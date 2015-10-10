@@ -7,7 +7,7 @@
 int main () {
 
     t_immagine img_1,img_2;
-    char rix[3],percorso[PATH_DIM],cartella_nuove_immagini[PATH_DIM];
+    char rix[3],percorso[200],cartella_nuove_immagini[200];
     int sel,n;
     struct stringa* testa;
 

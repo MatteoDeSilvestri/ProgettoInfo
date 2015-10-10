@@ -424,6 +424,7 @@ void salva_dati_immagine(char percorso_immagini[],char percorso_cartella[]) {
             mkdir(tmp);
             strcat(tmp,"\\");
             strcat(tmp,nome->d_name);
+            //tmp[strlen(tmp)-(strlen(nome->d_name)-CODICE_DIM)]='\0';
             printf("\n%s\n",tmp);
             saveBMP(image,tmp);
             scrivi_dati_immagine(tmp);
@@ -532,10 +533,10 @@ void storicizzazione(char codice_fiscale[],char percorso_lavoro[]) {
     DIR* cartella;
     struct dirent* nome;
     FILE* f1;
-    char percorso[PATH_DIM];
-    char nomefile[PATH_DIM];
+    char percorso[60];
+    char nomefile[60];
     char stringa[11];
-    char zona[20];
+    char zona[7];
     char stringa1[20]="NULL";
     char livello[4];
     int i=0;
@@ -615,7 +616,7 @@ void storicizzazione(char codice_fiscale[],char percorso_lavoro[]) {
 int esistenza_codicefiscale(char stringa[],char x[]){
 
         FILE* f;
-        char stringa1[PATH_DIM];
+        char stringa1[200];
 
         strcpy(stringa1,x);
         strcat(stringa1,"\\");
@@ -634,7 +635,7 @@ int esistenza_codicefiscale(char stringa[],char x[]){
 
 
 //Stampa su file.doc i dati relativi all'anagrafica di uno o più pazienti, dentro la cartella di lavoro
-void anagrafica(char percorso[]) {
+void Anagrafica(char percorso[]) {
 
         FILE* f1;
         int i=1;
@@ -644,7 +645,7 @@ void anagrafica(char percorso[]) {
         int mese;
         int anno;
         char codicefiscale[16];
-        char stringa1[PATH_DIM];
+        char stringa1[200];
 
         if(access(percorso,F_OK)!=0) //funzione che crea la cartella solo se non è gia esistente
 
@@ -740,6 +741,7 @@ int mostra_menu(void) {
     printf("\n\n7 - Calcolare l'area racchiusa nel contorno");
     printf("\n\n8 - Calcolare area scura e chiara");
     printf("\n\n9 - Calcolare la variazione d'area tra due immagini");
+    printf("\n\n10 - Risalire al proprietario di un'immagine");
     printf("\n\n\nDigitare il numero dell'opzione d'interesse:  ");
     scanf("%d",&rix);
 
@@ -920,7 +922,7 @@ void esegui_scelta (int selezione,char percorso_cartella[],t_immagine* img_1,t_i
     if (selezione==1) {
 
         printf(" - Creare nuovi pazienti\n\n");
-        anagrafica(percorso_cartella);
+        Anagrafica(percorso_cartella);
 
     }
 
@@ -1309,7 +1311,145 @@ void esegui_scelta (int selezione,char percorso_cartella[],t_immagine* img_1,t_i
         printf("\n\n%d %d\n\n%d %d",img_1->caratteristiche_img.area_racchiusa.area_chiara_pixel,img_1->caratteristiche_img.area_racchiusa.area_scura_pixel,img_2->caratteristiche_img.area_racchiusa.area_chiara_pixel,img_2->caratteristiche_img.area_racchiusa.area_scura_pixel);
 
     }
+    else if (selezione==10) {
+        printf("\n\nDigitare il nome originale dell'immagine:  ");
+        scanf("%s",tmp);
+        strcat(tmp,".bmp");
+        trova_proprietario(tmp,percorso_cartella);
+    }
 
     else printf("\n\nerrore: selezione non valida");
+
+}
+
+
+//Dato il nome originale di un'immagine risale al paziente a cui l'immagine appartiene
+//(se l'anagrafica è già stata compilata)
+void trova_proprietario (char nome_immagine[],char percorso_cartella[]) {
+
+    char percorso[PATH_DIM];
+    char percorsoregistr[PATH_DIM];
+    char percorsoanagrafica[PATH_DIM];
+    char nomefile[50];
+    DIR* cartella;
+    DIR* cartella2;
+    struct dirent* nome2;
+    struct dirent* nome;
+    FILE* f1;
+    FILE* f2;
+    char stringa[50];
+    char codicefiscale[17];
+    char codicefiscale1[17];
+    char zona[15];
+    char livello[17];
+    char data[10];
+    int i;
+    int cont=0;
+    char nomepaz[10];
+    char cognome[10];
+
+    strcpy(percorso,percorso_cartella);
+    strcat(percorso,"\\..\\Backup_immagini");
+    cartella=opendir(percorso);
+
+    if (cartella!=NULL){
+
+        seekdir(cartella,2);
+        nome=readdir(cartella);
+
+        while (strcmp(nome->d_name,nome_immagine))
+
+            nome=readdir(cartella);
+
+        if (nome==NULL) printf("\n\nerrore: immagine non trovata");
+
+        else {
+
+            strcat(percorso,"\\");
+            strcat(percorso,nome->d_name);
+            f1=fopen(percorso,"r");
+            fseek(f1,sizeof(BMP_Image),SEEK_SET);
+            fscanf(f1,"%s",stringa);
+            strncpy(codicefiscale,stringa,16);
+            codicefiscale[16]='\0';//codice fiscale dal fondo file backup
+            fseek(f1,sizeof(BMP_Image)+20,SEEK_SET);
+            fscanf(f1,"%s",stringa);
+            strncpy(data,stringa,10);
+            data[10]='\0';
+            fseek(f1,sizeof(BMP_Image)+24+strlen(data),SEEK_SET);
+            fscanf(f1,"%s",stringa);
+
+            for(i=0;i<strlen(stringa);i++) {
+
+                if(stringa[i]!='-') cont++;
+
+                else break;
+            }
+
+            strncpy(zona,stringa,cont);
+            zona[cont]='\0';
+            fseek(f1,sizeof(BMP_Image)+24+strlen(data)+cont+4,SEEK_SET);
+            fscanf(f1,"%s",stringa);
+            strncpy(livello,stringa,3);
+            livello[3]='\0';
+            strcpy(nomefile,data);
+            nomefile[2]='-';
+            nomefile[5]='-';
+            nomefile[10]='.';
+            nomefile[11]='\0';
+            strcat(nomefile,zona);
+            nomefile[11+cont]='.';
+            nomefile[12+cont]='\0';
+            strcat(nomefile,livello);
+            nomefile[12+cont+3]='\0';
+            strcat(nomefile,".bmp");
+            nomefile[12+cont+7]='\0';
+            strncpy(codicefiscale1,codicefiscale,16);
+            codicefiscale1[16]='\0';
+            strcpy(percorsoregistr,percorso_cartella);
+            strcat(percorsoregistr,"\\");
+            strcat(percorsoregistr,codicefiscale1);
+            strcat(percorsoregistr,"\\");
+            strcat(percorsoregistr,"TAC");
+            cartella2=opendir(percorsoregistr);
+
+            if (cartella!=NULL){
+
+                seekdir(cartella2,2);
+                nome2=readdir(cartella2);
+
+                while (nome2!=NULL){
+
+                    if(strcmp(nome2->d_name,nomefile)==0){
+
+                        printf("\n\nTrovata corrispondenza\n\n");
+                        strcpy(percorsoanagrafica,percorso_cartella);
+                        strcat(percorsoanagrafica,"\\");
+                        strcat(percorsoanagrafica,codicefiscale1);
+                        strcat(percorsoanagrafica,"\\");
+                        strcat(percorsoanagrafica,codicefiscale1);
+                        strcat(percorsoanagrafica,"-anagrafica.doc");
+                        f2=fopen(percorsoanagrafica,"r");
+                        fseek(f2,96,SEEK_SET);
+                        fscanf(f2,"%s",nomepaz);
+                        printf("L'immagine %s appartiene a:\n\n",nome->d_name);
+                        printf("Nome: %s\n",nomepaz);
+                        fseek(f2,96+strlen(nomepaz)+10,SEEK_SET);
+                        fscanf(f2,"%s\n",cognome);
+                        printf("Cognome: %s\n\n",cognome);
+                        printf("***********************************\n");
+                        break;
+
+                    }
+
+                    nome2=readdir(cartella2);
+
+                }
+
+            }
+
+        }
+
+    }
 
 }

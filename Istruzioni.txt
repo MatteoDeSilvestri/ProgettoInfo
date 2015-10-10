@@ -1,0 +1,7 @@
+Il file Libreria_progetto.c contiene i corpi delle funzioni definite in Libreria_progetto.h, il file Main_progetto.c invece contiene il main del programma.
+
+Come prima cosa è necessario aprire il file Main_progetto.c e modificare i percorsi predefiniti alle linee 22 e 45, è possibile modificarli anche runtime ma non in maniera definitiva.
+
+Il programma crea tutte le cartelle di cui ha bisogno, però carica le immagini contenute nella cartella predisposta per il deposito immagini solo all'avvio, quindi sarebbe meglio creare una cartella in cui siano contenute le immagini e poi all'avvio scrivere il percorso di questa cartella quando richiesto (se non si vuole usare quella predefinita).
+
+Inoltre per utilizzare i display è necessario copiare due delle immagini bmp fornite nella cartella di lavoro (default: Registro_pazienti) rinominandole rispettivamente "Display.bmp" e "Display 2.bmp".

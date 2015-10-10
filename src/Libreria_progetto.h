@@ -198,10 +198,10 @@ void confronta_aree (t_immagine* img_1,t_immagine* img_2);
 void salva_dati_immagine(char percorso_immagini[],char percorso_cartella[]);
 
 //Scrivere i dati in fondo all'immagine
-void scrivi_dati_immagine (char filename []);
+void scrivi_dati_immagine (char filename [DATA_DIM]);
 
 //Copare le immagini nella cartella di lavoro con il nome corretto, eliminandole dala cartella di deposito
-void sposta_file_immagine (char filename [],BMP_Image img,char percorso_cartella[]);
+void sposta_file_immagine (char filename [DATA_DIM],BMP_Image img,char percorso_cartella[]);
 
 //Stampare a video, salvando una copia su file.doc, la storia di un paziente
 void storicizzazione(char codice_fiscale[],char percorso_cartella[]);
@@ -210,7 +210,7 @@ void storicizzazione(char codice_fiscale[],char percorso_cartella[]);
 int esistenza_codicefiscale(char stringa[],char x[]);
 
 //Salvare su file.doc l'anagrafica di uno o più pazienti
-void anagrafica(char percorso[]);
+void Anagrafica(char percorso[]);
 
 //Visualizzare il menu di scelta
 int mostra_menu(void);
@@ -238,3 +238,6 @@ void esegui_scelta (int selezione,char percorso_cartella[],t_immagine* img_1,t_i
 
 //Verificare la presenza di immagini da caricare nella cartella di deposito
 void controlla_nuove_immagini (char percorso_immagini[],char percorso_cartella[]);
+
+//Risalire al proprietario di un'immagine
+void trova_proprietario (char nome_immagine[],char percorso_cartella[]);
